@@ -154,7 +154,8 @@
 
         /* ===== TASK LIST ===== */
         .container {
-            padding: 12px 0;
+            padding: 12px 16px;
+            max-width: 680px;
         }
 
         .task-list {
@@ -190,8 +191,8 @@
             flex: 1;
             min-width: 0;
             display: flex;
-            align-items: center;
-            gap: 12px;
+            flex-direction: column;
+            gap: 2px;
         }
 
         .task-title {
@@ -202,18 +203,38 @@
             overflow: hidden;
             text-overflow: ellipsis;
             line-height: 1.3;
-            flex: 1;
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 11px;
+            color: #98a2b3;
+            line-height: 1.2;
+        }
+
+        .task-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+            white-space: nowrap;
+        }
+
+        .task-meta-item svg {
+            width: 11px;
+            height: 11px;
+            opacity: 0.5;
         }
 
         .task-hours {
             font-size: 11px;
             color: #667085;
             white-space: nowrap;
-            flex-shrink: 0;
-            padding: 2px 6px;
+            padding: 1px 5px;
             background: #f7f8fa;
-            border-radius: 4px;
-            line-height: 1.3;
+            border-radius: 3px;
+            line-height: 1.2;
         }
 
         .task-hours .hours-actual {
@@ -224,7 +245,7 @@
         .task-right {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             flex-shrink: 0;
         }
 
@@ -498,6 +519,8 @@
             .stage-badge { min-width: 75px; font-size: 9px; padding: 3px 7px; }
             .task-category { display: none; }
             .task-hours { font-size: 10px; }
+            .container { padding: 8px 10px; }
+            .task-meta { gap: 6px; }
             .preview-panel { width: 100%; max-width: 100vw; }
         }
 
@@ -656,16 +679,25 @@ function renderTasks() {
     list.innerHTML = filtered.map(task => {
         const stage = stageConfig[task.stage];
         const isOverdue = new Date(task.deadline) < new Date() && task.stage !== "backlog";
+        const deadlineStr = formatDate(task.deadline);
 
         const hoursHtml = (task.hoursActual > 0 || task.hoursPlanned > 0)
-            ? `<span class="task-hours"><span class="hours-actual">${task.hoursActual}</span> ч</span>`
+            ? `<span class="task-meta-item"><span class="task-hours"><span class="hours-actual">${task.hoursActual}</span> ч</span></span>`
             : '';
 
         return `
             <div class="task-item ${isOverdue ? 'deadline-overdue' : ''}" onclick="openPreview(${task.id})">
                 <div class="task-left">
                     <div class="task-title">${escapeHtml(task.title)}</div>
-                    ${hoursHtml}
+                    <div class="task-meta">
+                        <span class="task-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ${deadlineStr}
+                        </span>
+                        <span class="task-meta-item">${escapeHtml(task.responsible)}</span>
+                        ${task.programmer ? `<span class="task-meta-item" style="color:#667085">→ ${escapeHtml(task.programmer)}</span>` : ''}
+                        ${hoursHtml}
+                    </div>
                 </div>
                 <div class="task-right">
                     <span class="task-category">${escapeHtml(task.category)}</span>
