@@ -149,22 +149,22 @@
             color: #1a1a2e;
         }
 
-        /* ===== FILTERS ===== */
-        .filters {
+        /* ===== TOOLBAR (filters + search + summary) ===== */
+        .toolbar {
             background: #fff;
             border-bottom: 1px solid #e0e0e0;
-            padding: 10px 20px;
+            padding: 8px 20px;
             display: flex;
             align-items: center;
-            gap: 6px;
-            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .filter-label {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
             color: #667085;
-            margin-right: 2px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .filter-chip {
@@ -176,6 +176,8 @@
             border: 1px solid transparent;
             transition: all 0.15s;
             user-select: none;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .filter-chip.active { color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
@@ -189,31 +191,27 @@
         .fc-payment.active { background: #059669; }
 
         /* ===== SEARCH ===== */
-        .search-bar {
-            background: #fff;
-            border-bottom: 1px solid #e0e0e0;
-            padding: 8px 20px;
-        }
-
         .search-input {
-            width: 100%;
-            padding: 7px 12px 7px 32px;
+            width: 180px;
+            padding: 5px 10px 5px 28px;
             border: 1px solid #e0e0e0;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 12px;
             color: #1a1a2e;
-            background: #f9fafb url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2398a2b3' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 10px center no-repeat;
+            background: #f9fafb url("data:image/svg+xml,%3Csvg width='13' height='13' viewBox='0 0 24 24' fill='none' stroke='%2398a2b3' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 8px center no-repeat;
             outline: none;
-            transition: border-color 0.15s, background-color 0.15s;
+            transition: all 0.15s;
+            flex-shrink: 0;
         }
 
         .search-input::placeholder { color: #b0b8c4; }
-        .search-input:focus { border-color: #3b82f6; background-color: #fff; }
+        .search-input:focus { border-color: #3b82f6; background-color: #fff; width: 240px; }
 
         .task-count {
-            font-size: 12px;
+            font-size: 11px;
             color: #667085;
-            margin-left: auto;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         /* ===== TASK LIST ===== */
@@ -596,31 +594,18 @@
     </div>
 </div>
 
-<!-- Summary -->
-<div class="summary" id="summaryBar">
-    <span class="summary-title">Сводка</span>
-    <span class="summary-item"><span class="summary-dot" style="background:#3b82f6"></span> Бэклог: <span class="summary-count" id="sumBacklog">0</span></span>
-    <span class="summary-item"><span class="summary-dot" style="background:#22c55e"></span> В работе: <span class="summary-count" id="sumInwork">0</span></span>
-    <span class="summary-item"><span class="summary-dot" style="background:#ef4444"></span> Тест: <span class="summary-count" id="sumTesting">0</span></span>
-    <span class="summary-item"><span class="summary-dot" style="background:#f97316"></span> Релиз: <span class="summary-count" id="sumRelease">0</span></span>
-    <span class="summary-item"><span class="summary-dot" style="background:#059669"></span> Оплата: <span class="summary-count" id="sumPayment">0</span></span>
-    <span class="summary-hours">Σ факт: <strong id="sumHours">0</strong> ч</span>
-</div>
-
-<!-- Filters -->
-<div class="filters">
+<!-- Toolbar: filters + search + summary -->
+<div class="toolbar">
     <span class="filter-label">Стадия:</span>
     <span class="filter-chip fc-backlog active" data-stage="backlog" onclick="toggleFilter(this)">Бэклог</span>
     <span class="filter-chip fc-inwork active" data-stage="inwork" onclick="toggleFilter(this)">В работе</span>
     <span class="filter-chip fc-testing active" data-stage="testing" onclick="toggleFilter(this)">Тестирование</span>
     <span class="filter-chip fc-release active" data-stage="release" onclick="toggleFilter(this)">В релиз</span>
     <span class="filter-chip fc-payment active" data-stage="payment" onclick="toggleFilter(this)">На оплату</span>
-    <span class="task-count" id="filteredCount">47 задач</span>
-</div>
 
-<!-- Search -->
-<div class="search-bar">
-    <input class="search-input" type="text" id="searchInput" placeholder="Поиск по названию задачи..." oninput="renderTasks()">
+    <input class="search-input" type="text" id="searchInput" placeholder="Поиск..." oninput="renderTasks()">
+
+    <span class="summary-hours" style="white-space:nowrap;font-size:11px;color:#475469;margin-left:auto">Σ <strong id="sumHours">0</strong> ч &nbsp; <span id="filteredCount" class="task-count">47 задач</span></span>
 </div>
 
 <!-- Task List -->
@@ -716,17 +701,8 @@ let activeFilters = new Set(["backlog", "inwork", "testing", "release", "payment
 
 // ===== SUMMARY =====
 function updateSummary() {
-    const counts = { backlog: 0, inwork: 0, testing: 0, release: 0, payment: 0 };
     let totalHours = 0;
-    tasks.forEach(t => {
-        if (counts.hasOwnProperty(t.stage)) counts[t.stage]++;
-        totalHours += t.hoursActual;
-    });
-    document.getElementById("sumBacklog").textContent = counts.backlog;
-    document.getElementById("sumInwork").textContent = counts.inwork;
-    document.getElementById("sumTesting").textContent = counts.testing;
-    document.getElementById("sumRelease").textContent = counts.release;
-    document.getElementById("sumPayment").textContent = counts.payment;
+    tasks.forEach(t => totalHours += t.hoursActual);
     document.getElementById("sumHours").textContent = totalHours;
 }
 
