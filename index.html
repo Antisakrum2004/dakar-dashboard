@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ИТ Поддержка — Дакар</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f0f2f5;
+            color: #1a1a2e;
+            min-height: 100vh;
+        }
+
+        /* ===== HEADER ===== */
+        .header {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .header-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .header-subtitle {
+            font-size: 13px;
+            color: #888;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: 1px solid #d0d5dd;
+            border-radius: 8px;
+            background: #fff;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #344054;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.15s;
+        }
+
+        .btn:hover { background: #f9fafb; border-color: #98a2b3; }
+
+        .btn-primary {
+            background: #1a1a2e;
+            color: #fff;
+            border-color: #1a1a2e;
+        }
+
+        .btn-primary:hover { background: #2d2d4a; }
+
+        .btn .spinner {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        .btn:not(.btn-primary) .spinner {
+            border-color: rgba(0,0,0,0.1);
+            border-top-color: #666;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .timestamp {
+            font-size: 12px;
+            color: #98a2b3;
+        }
+
+        /* ===== FILTERS ===== */
+        .filters {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 24px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #667085;
+            margin-right: 4px;
+        }
+
+        .filter-chip {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.15s;
+            user-select: none;
+        }
+
+        .filter-chip.active {
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .filter-chip:not(.active) {
+            background: #f2f4f7;
+            color: #667085;
+        }
+
+        .filter-chip:not(.active):hover {
+            background: #eaecf0;
+        }
+
+        .fc-backlog.active { background: #3b82f6; }
+        .fc-inwork.active { background: #22c55e; }
+        .fc-testing.active { background: #ef4444; }
+        .fc-release.active { background: #f97316; }
+        .fc-payment.active { background: #059669; }
+
+        .task-count {
+            font-size: 13px;
+            color: #667085;
+            margin-left: auto;
+        }
+
+        /* ===== TASK LIST ===== */
+        .container {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        .task-list {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .task-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 20px;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.12s;
+            border-radius: 4px;
+            gap: 16px;
+        }
+
+        .task-item:hover {
+            background: #f8fafc;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            transform: translateX(2px);
+        }
+
+        .task-item:active {
+            transform: translateX(0);
+            background: #f0f4ff;
+        }
+
+        .task-left {
+            flex: 1;
+            min-width: 0;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .task-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1a1a2e;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            line-height: 1.4;
+        }
+
+        .task-meta {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 12px;
+            color: #98a2b3;
+        }
+
+        .task-meta-item {
+            display: flex;
+            align-items: center;
+            gap: 3px;
+        }
+
+        .task-meta-item svg {
+            width: 13px;
+            height: 13px;
+            opacity: 0.5;
+        }
+
+        .task-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+
+        .task-category {
+            font-size: 11px;
+            padding: 3px 8px;
+            border-radius: 4px;
+            background: #f2f4f7;
+            color: #667085;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        /* ===== STAGE BADGES ===== */
+        .stage-badge {
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+            min-width: 110px;
+            text-align: center;
+        }
+
+        .stage-backlog {
+            background: #dbeafe;
+            color: #1d4ed8;
+        }
+
+        .stage-inwork {
+            background: #dcfce7;
+            color: #15803d;
+        }
+
+        .stage-testing {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+
+        .stage-release {
+            background: #ffedd5;
+            color: #ea580c;
+        }
+
+        .stage-payment {
+            background: #d1fae5;
+            color: #047857;
+        }
+
+        .deadline-overdue .task-title::after {
+            content: ' !';
+            color: #ef4444;
+            font-weight: 700;
+        }
+
+        /* ===== PREVIEW PANEL ===== */
+        .preview-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.3);
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.2s;
+        }
+
+        .preview-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .preview-panel {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 520px;
+            max-width: 90vw;
+            background: #fff;
+            z-index: 201;
+            transform: translateX(100%);
+            transition: transform 0.25s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -4px 0 20px rgba(0,0,0,0.12);
+        }
+
+        .preview-panel.active {
+            transform: translateX(0);
+        }
+
+        .preview-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .preview-close {
+            width: 32px;
+            height: 32px;
+            border: none;
+            background: #f2f4f7;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.15s;
+            font-size: 18px;
+            color: #667085;
+        }
+
+        .preview-close:hover { background: #eaecf0; }
+
+        .preview-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #1a1a2e;
+            line-height: 1.4;
+        }
+
+        .preview-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 24px;
+        }
+
+        .preview-field {
+            margin-bottom: 16px;
+        }
+
+        .preview-field-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #98a2b3;
+            margin-bottom: 4px;
+        }
+
+        .preview-field-value {
+            font-size: 14px;
+            color: #344054;
+            line-height: 1.5;
+        }
+
+        .preview-description {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 16px;
+            font-size: 13px;
+            color: #475467;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .preview-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #e5e7eb;
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-open-bitrix {
+            flex: 1;
+            padding: 10px 16px;
+            background: #1a1a2e;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: background 0.15s;
+        }
+
+        .btn-open-bitrix:hover { background: #2d2d4a; }
+
+        /* ===== LOADING ===== */
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #e5e7eb;
+            z-index: 300;
+            overflow: hidden;
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+
+        .loading-bar.active { opacity: 1; }
+
+        .loading-bar-fill {
+            height: 100%;
+            background: #3b82f6;
+            width: 0%;
+            transition: width 0.3s;
+            border-radius: 0 2px 2px 0;
+        }
+
+        /* ===== RESPONSIVE ===== */
+        @media (max-width: 640px) {
+            .header { padding: 12px 16px; }
+            .header-title { font-size: 17px; }
+            .filters { padding: 10px 16px; }
+            .container { padding: 8px; }
+            .task-item { padding: 12px 14px; gap: 10px; }
+            .task-title { font-size: 13px; }
+            .stage-badge { min-width: 90px; font-size: 10px; padding: 4px 8px; }
+            .task-category { display: none; }
+            .task-meta { gap: 8px; }
+            .preview-panel { width: 100%; max-width: 100vw; }
+        }
+
+        /* Scrollbar */
+        .task-list::-webkit-scrollbar,
+        .preview-body::-webkit-scrollbar {
+            width: 6px;
+        }
+        .task-list::-webkit-scrollbar-thumb,
+        .preview-body::-webkit-scrollbar-thumb {
+            background: #d1d5db;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Loading bar -->
+<div class="loading-bar" id="loadingBar">
+    <div class="loading-bar-fill" id="loadingFill"></div>
+</div>
+
+<!-- Header -->
+<div class="header">
+    <div class="header-left">
+        <div>
+            <div class="header-title">ИТ Поддержка — Дакар</div>
+            <div class="header-subtitle" id="lastUpdate">Обновлено: 7 апреля 2026, 15:24</div>
+        </div>
+    </div>
+    <div class="header-actions">
+        <div class="timestamp" id="taskCount">67 задач</div>
+        <button class="btn" onclick="refreshData()" id="refreshBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Обновить
+        </button>
+        <button class="btn btn-primary" onclick="exportExcel()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Excel
+        </button>
+    </div>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+    <span class="filter-label">Стадия:</span>
+    <span class="filter-chip fc-backlog active" data-stage="backlog" onclick="toggleFilter(this)">Бэклог</span>
+    <span class="filter-chip fc-inwork active" data-stage="inwork" onclick="toggleFilter(this)">В работе</span>
+    <span class="filter-chip fc-testing active" data-stage="testing" onclick="toggleFilter(this)">Тестирование</span>
+    <span class="filter-chip fc-release active" data-stage="release" onclick="toggleFilter(this)">В релиз</span>
+    <span class="filter-chip fc-payment active" data-stage="payment" onclick="toggleFilter(this)">На оплату</span>
+    <span class="task-count" id="filteredCount">47 задач</span>
+</div>
+
+<!-- Task List -->
+<div class="container">
+    <div class="task-list" id="taskList">
+        <!-- Tasks will be rendered here -->
+    </div>
+</div>
+
+<!-- Preview Overlay -->
+<div class="preview-overlay" id="previewOverlay" onclick="closePreview()"></div>
+
+<!-- Preview Panel -->
+<div class="preview-panel" id="previewPanel">
+    <div class="preview-header">
+        <div class="preview-title" id="previewTitle"></div>
+        <button class="preview-close" onclick="closePreview()">&times;</button>
+    </div>
+    <div class="preview-body" id="previewBody"></div>
+    <div class="preview-footer" id="previewFooter"></div>
+</div>
+
+<script>
+// ===== MOCK DATA (real tasks from Bitrix24, last month, 5 active stages) =====
+const tasks = [
+    // В РАБОТЕ (13)
+    { id: 2014, title: "Организация работы менеджеров в онлайн режиме в полях по средствам мобильного приложения", stage: "inwork", category: "Продажи", responsible: "Анатолий Евич", programmer: "Константин Приходько", deadline: "2026-01-31", created: "2025-07-29", description: "Организация работы менеджеров в онлайн режиме в полях по средствам мобильного приложения" },
+    { id: 2222, title: "Интеграция платежных табличек Т-Банк и Дакар", stage: "inwork", category: "Продажи", responsible: "Сергей Мироненко", programmer: "Александр Соколовский", deadline: "2026-04-12", created: "2025-10-01", description: "Интеграция платежных табличек Т-Банк и Дакар" },
+    { id: 2460, title: "Не работает автоматическое закрытие заказов", stage: "inwork", category: "Продажи", responsible: "Сергей Мироненко", programmer: "Андрей Предеин", deadline: "2026-04-12", created: "2025-10-24", description: "Необходимо восстановить рабочий функционал автоматического закрытия заказов" },
+    { id: 2578, title: "Уведомление о статусе выгрузки на сайт", stage: "inwork", category: "ИТ", responsible: "Владимир Макаров", programmer: "Александр Соколовский", deadline: "2026-04-05", created: "2025-12-08", description: "Настроить ежедневные уведомления на почту о статусе выгрузки сайта B2C Dakar61.ru" },
+    { id: 2649, title: "Картинки номенклатуры из внешних источников", stage: "inwork", category: "ИТ", responsible: "Анатолий Евич", programmer: "Александр Соколовский", deadline: "2026-04-05", created: "2026-03-10", description: "Картинки из внешних источников: открыть FTP на сайте, создать РС ВнешниеКартинкиНоменклатуры, доработать выгрузку на сайт" },
+    { id: 2655, title: "Некорректная выгрузка и сброс остатков", stage: "inwork", category: "Маркетинг", responsible: "Анна Третьякова", programmer: "Владимир Макаров", deadline: "2026-04-30", created: "2026-03-11", description: "Некорректная выгрузка и сброс остатков на сайте" },
+    { id: 2663, title: "Автоопределение договора платежа при загрузке клиент банка", stage: "inwork", category: "Продажи", responsible: "Сергей Мироненко", programmer: "Андрей Предеин", deadline: "2026-04-05", created: "2026-03-16", description: "Доработать загрузку платежных поручений на поступление ДС. Автоматическое распределение суммы по договорам задолженности" },
+    { id: 2665, title: "Ошибки в ценообразовании Авито", stage: "inwork", category: "Управление персоналом", responsible: "Елена Цыфарова", programmer: "Константин Приходько", deadline: "2026-04-05", created: "2026-03-16", description: "Ошибки в ценообразовании Авито" },
+    { id: 2689, title: "Создавать авансовые СЧФ в УТ", stage: "inwork", category: "ИТ", responsible: "Анатолий Евич", programmer: "Александр Соколовский", deadline: "2026-04-10", created: "2026-03-23", description: "Создавать авансовые СЧФ в УТ: рег заданием 1 раз в день, на все платежные поручения с авансами" },
+    { id: 2691, title: "Проверить обмен авансовыми СЧФ с Бухгалтерией", stage: "inwork", category: "ИТ", responsible: "Анатолий Евич", programmer: "Анатолий Евич", deadline: "2026-04-01", created: "2026-03-23", description: "Проверить обмен авансовыми СЧФ с Бухгалтерией" },
+    { id: 2713, title: "Подключение ЛК Авито Подольск Дакар к 1С", stage: "inwork", category: "Управление персоналом", responsible: "Елена Цыфарова", programmer: "Александр Соколовский", deadline: "2026-04-12", created: "2026-03-31", description: "Подключение ЛК Авито Подольск Дакар к 1С" },
+    { id: 2715, title: "ОШИБКА автоматического резервирования", stage: "inwork", category: "Продажи", responsible: "Сергей Мироненко", programmer: "Константин Приходько", deadline: "2026-04-05", created: "2026-03-31", description: "ОШИБКА автоматического резервирования" },
+    { id: 2717, title: "Автоматизация массовой выгрузки товаров на Озон через модуль 1С", stage: "inwork", category: "Управление персоналом", responsible: "Елена Цыфарова", programmer: "Александр Соколовский", deadline: "2026-04-19", created: "2026-03-31", description: "Автоматизация массовой выгрузки товаров на Озон через модуль 1С" },
+
+    // ТЕСТИРОВАНИЕ (14)
+    { id: 2564, title: "Организовать возможность контрагентам в портале В2В осуществлять заказы товаров", stage: "testing", category: "Продажи", responsible: "Сергей Мироненко", programmer: "Вадим Авраменко", deadline: "2026-01-31", created: "2025-11-30", description: "Необходимо организовать возможность контрагентам в портале В2В осуществлять заказы товаров с конкретных складов и видеть остатки" },
+    { id: 2574, title: "Ошибка (Bug): Заведены два договора на разных контрагентов с одинаковым № и датой", stage: "testing", category: "Бухгалтерия", responsible: "Наталья Хоренко", programmer: "Константин Приходько", deadline: "2025-12-05", created: "2025-12-05", description: "Ошибка: Заведены два договора на разных контрагентов с одинаковым номером и датой" },
+    { id: 2580, title: "Номера в договорах поставки", stage: "testing", category: "Бухгалтерия", responsible: "Наталья Елецкая", programmer: "Павел Красноперов", deadline: "2025-12-09", created: "2025-12-09", description: "Номера в договорах поставки" },
+    { id: 2584, title: "Ошибка (Bug) для Евгения Положенцева — Закупки: Ошибка в справочнике номенклатуры при создании группы", stage: "testing", category: "Опер. отдел", responsible: "Евгения Положенцева", programmer: "Константин Приходько", deadline: "2025-12-09", created: "2025-12-09", description: "Ошибка в справочнике номенклатуры при создании группы" },
+    { id: 2610, title: "Раздельная печать расходных ордеров", stage: "testing", category: "Склад", responsible: "Евгений Кулешов", programmer: "Тимур Забиров", deadline: "2026-01-29", created: "2026-01-22", description: "Необходимо чтобы расходные ордера печатались каждый на своем листе" },
+    { id: 2620, title: "Выгрузка цен и остатков поставщика Багория", stage: "testing", category: "Продажи", responsible: "Сергей Мироненко", programmer: "Тимур Забиров", deadline: "2026-04-01", created: "2026-02-04", description: "Организовать выгрузку цен и остатков поставщика Багория с их портала В2В через API" },
+    { id: 2635, title: "Загрузка прайса поставщика Шинсервис", stage: "testing", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-02-26", created: "2026-02-26", description: "Доработать загрузку прайсов поставщиков, добавить загрузку прайса для поставщика Шинсервис через API" },
+    { id: 2639, title: "Интеграция загрузки прайса поставщика 4точки", stage: "testing", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-03-15", created: "2026-03-04", description: "Интеграция загрузки прайса поставщика 4точки в обработку загрузки прайсов через API" },
+    { id: 2657, title: "Доработки для механизма региональных заказов на сайте", stage: "testing", category: "ИТ", responsible: "Анатолий Евич", programmer: "Александр Соколовский", deadline: "2026-04-05", created: "2026-03-11", description: "Доработать загрузку заказа по полю Регион, доработать выгрузку прайсов на сайт с полем Регион" },
+    { id: 2661, title: "Контроль подписания договоров бухгалтерией", stage: "testing", category: "Продажи", responsible: "Сергей Мироненко", programmer: "Тимур Забиров", deadline: "2026-04-05", created: "2026-03-16", description: "Переделать ограничения на реквизит Класс договора, убрать функционал шаблонов наименования" },
+    { id: 2683, title: "Добавить поставщика Северавто в загрузку прайсов", stage: "testing", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-04-05", created: "2026-03-23", description: "Добавить поставщика Северавто в загрузку прайсов через API: https://webmim.svrauto.ru" },
+    { id: 2685, title: "Добавить поставщика Вершина в загрузку прайсов", stage: "testing", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-04-05", created: "2026-03-23", description: "Добавить поставщика Вершина в загрузку прайсов через XML выгрузку" },
+    { id: 2701, title: "Добавить поставщика Яршинторг в загрузку прайсов", stage: "testing", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-04-12", created: "2026-03-24", description: "Добавить поставщика Яршинторг в загрузку прайсов через приложение-скачивание" },
+    { id: 2721, title: "Правила определения Вида номенклатуры для шин при загрузке прайсов", stage: "testing", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-04-05", created: "2026-04-02", description: "Правила определения: легкогрузовая (С на конце), грузовая (дробный диаметр), легковая (не грузовая, не легкогрузовая)" },
+
+    // В РЕЛИЗ (7)
+    { id: 2641, title: "Актуальность остатков поставщиков", stage: "release", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-04-05", created: "2026-03-10", description: "Регламентное задание для проверки актуальности остатков поставщиков. При просрочке — обнуление остатков и оповещение менеджера" },
+    { id: 2645, title: "Автоматическая загрузка прайсов", stage: "release", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-04-05", created: "2026-03-10", description: "Регламентное задание на автозагрузку прайса. Расписание задается в складе поставщика" },
+    { id: 2647, title: "Авторасчет закупочных цен", stage: "release", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-04-05", created: "2026-03-10", description: "При установке цены закупки поставщика, рассчитывать и устанавливать все зависимые типы цен" },
+    { id: 2651, title: "Автоматический расчет и установка типов цен", stage: "release", category: "Продажи", responsible: "Сергей Мироненко", programmer: "Константин Приходько", deadline: "2026-04-05", created: "2026-03-10", description: "Чтобы в документ установки цен попадали все цены зависимые от цены АВИТО, и автоматически рассчитывались" },
+    { id: 2669, title: "Автоматизация формирования наименований (дубликат)", stage: "release", category: "ИТ", responsible: "Анатолий Евич", programmer: "Константин Приходько", deadline: "2026-04-05", created: "2026-03-18", description: "Создать реквизит Тип шаблона, добавить автоформирование наименования по шаблону для вида номенклатуры" },
+    { id: 2693, title: "Автоматизация формирования наименований", stage: "release", category: "ИТ", responsible: "Анатолий Евич", programmer: "Константин Приходько", deadline: "2026-04-05", created: "2026-03-23", description: "Создать реквизит Тип шаблона (перечисление), добавить в номенклатуру функционал автоформирования наименования по шаблону" },
+    { id: 2699, title: "Добавить поставщика Мосавтошина в загрузку прайсов", stage: "release", category: "ИТ", responsible: "Анатолий Евич", programmer: "Тимур Забиров", deadline: "2026-04-05", created: "2026-03-24", description: "Добавить поставщика Мосавтошина в загрузку прайсов: https://opt.mosautoshina.ru/db/" },
+
+    // НА ОПЛАТУ (6)
+    { id: 2608, title: "Механизм автоформирования наименования для сайта", stage: "payment", category: "ИТ", responsible: "Анатолий Евич", programmer: "Александр Соколовский", deadline: "2026-01-31", created: "2026-01-20", description: "Создать справочник Шаблоны формирования наименований номенклатуры с таб частью Формула" },
+    { id: 2614, title: "Погрузочный реестр к заданию на перевозку", stage: "payment", category: "Логистика", responsible: "Наталья Стрельчик", programmer: "Константин Приходько", deadline: "2026-02-02", created: "2026-02-02", description: "Погрузочный реестр к заданию на перевозку" },
+    { id: 2633, title: "В договоре с клиентом вывести реквизит для исключения изменения регистра", stage: "payment", category: "Бухгалтерия", responsible: "Наталья Хоренко", programmer: "Константин Приходько", deadline: "2026-03-08", created: "2026-02-25", description: "Вывести реквизит (установить/снять галочку) для возможности установки исключения изменения регистра" },
+    { id: 2643, title: "Объединение заказов", stage: "payment", category: "ИТ", responsible: "Анатолий Евич", programmer: "Константин Приходько", deadline: "2026-03-27", created: "2026-03-10", description: "Пользователь выделяет несколько заказов → состав переносится в заказ с минимальной датой → остальные закрываются" },
+    { id: 2703, title: "Классификация договоров", stage: "payment", category: "ИТ", responsible: "Анатолий Евич", programmer: "Константин Приходько", deadline: "2026-03-29", created: "2026-03-25", description: "Добавить перечисление КлассыДоговоровПродажи с 15 значениями, добавить реквизит в справочник ДоговорыКонтрагентов" },
+    { id: 2705, title: "Проблема: Разобрать отчет по Прибыль и убытки", stage: "payment", category: "ИТ", responsible: "Владимир Макаров", programmer: "Константин Приходько", deadline: "2026-03-20", created: "2026-03-25", description: "В отчет попадает сумма которой нет в расшифровке" },
+
+    // БЭКЛОГ (7)
+    { id: 2188, title: "Выгрузка всех доп свойств на сайт", stage: "backlog", category: "Маркетинг", responsible: "Анна Третьякова", programmer: "Евгения Положенцева", deadline: "2026-04-05", created: "2025-09-26", description: "Дубликаты в названиях товаров. Выгрузка всех доп свойств на сайт" },
+    { id: 2414, title: "Бухгалтерия: Перепроводить документы загруженные в БухБазу", stage: "backlog", category: "Бухгалтерия", responsible: "Наталья Хоренко", programmer: "Антон Степанов", deadline: "2026-04-30", created: "2025-10-21", description: "Бухгалтерия: Перепроводить документы загруженные в БухБазу" },
+    { id: 2422, title: "Создать дату документа для бухгалтерии в документы перепродажи", stage: "backlog", category: "ИТ", responsible: "Анатолий Евич", programmer: "Анатолий Евич", deadline: "2026-04-30", created: "2025-10-21", description: "Создать дату документа для бухгалтерии в документы перепродажи. Доработать обмен с БУХ." },
+    { id: 2588, title: "Настройка обмена с сайтом РОСАВТОШИНА", stage: "backlog", category: "ИТ", responsible: "Анатолий Евич", programmer: "Владимир Макаров", deadline: "2026-04-30", created: "2025-12-09", description: "Выгрузка без учета остатков раз в сутки, выгрузка остатков раз в час" },
+    { id: 2671, title: "Настройка регистрации Золотой рыбки: терминал эквайринга, ККТ, ОП в 1С", stage: "backlog", category: "Дакар", responsible: "Даниил Ширяев", programmer: "Даниил Ширяев", deadline: "2026-04-30", created: "2026-03-18", description: "Регистрация терминала эквайринга, перерегистрация ККТ, регистрация ОП в 1С" },
+    { id: 2673, title: "Зарегистрировать онлайн кассу на сайте dakar61.ru", stage: "backlog", category: "Дакар", responsible: "Даниил Ширяев", programmer: "Даниил Ширяев", deadline: "2026-04-30", created: "2026-03-18", description: "Зарегистрировать онлайн кассу на сайте dakar61.ru" },
+    { id: 2719, title: "Автоматизация массовой выгрузки товаров на ЯндексМаркет через модуль 1С", stage: "backlog", category: "Управление персоналом", responsible: "Елена Цыфарова", programmer: "Андрей Предеин", deadline: "2026-04-26", created: "2026-03-31", description: "Автоматизация массовой выгрузки товаров на ЯндексМаркет через модуль 1С" },
+];
+
+// ===== STAGE CONFIG =====
+const stageConfig = {
+    backlog:  { label: "Бэклог",        badgeClass: "stage-backlog",  filterClass: "fc-backlog" },
+    inwork:   { label: "В работе",      badgeClass: "stage-inwork",  filterClass: "fc-inwork" },
+    testing:  { label: "Тестирование",  badgeClass: "stage-testing", filterClass: "fc-testing" },
+    release:  { label: "В релиз",       badgeClass: "stage-release", filterClass: "fc-release" },
+    payment:  { label: "На оплату",     badgeClass: "stage-payment", filterClass: "fc-payment" },
+};
+
+// ===== STATE =====
+let activeFilters = new Set(["backlog", "inwork", "testing", "release", "payment"]);
+
+// ===== RENDER =====
+function renderTasks() {
+    const list = document.getElementById("taskList");
+    const filtered = tasks.filter(t => activeFilters.has(t.stage));
+
+    // Sort: newest created first
+    filtered.sort((a, b) => new Date(b.created) - new Date(a.created));
+
+    document.getElementById("filteredCount").textContent = filtered.length + " задач";
+
+    list.innerHTML = filtered.map(task => {
+        const stage = stageConfig[task.stage];
+        const isOverdue = new Date(task.deadline) < new Date() && task.stage !== "backlog";
+        const deadlineStr = formatDate(task.deadline);
+        const createdStr = formatDate(task.created);
+
+        return `
+            <div class="task-item ${isOverdue ? 'deadline-overdue' : ''}" onclick="openPreview(${task.id})">
+                <div class="task-left">
+                    <div class="task-title">${escapeHtml(task.title)}</div>
+                    <div class="task-meta">
+                        <span class="task-meta-item">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+                            ${deadlineStr}
+                        </span>
+                        <span class="task-meta-item">${escapeHtml(task.responsible)}</span>
+                        ${task.programmer ? `<span class="task-meta-item" style="color:#667085">→ ${escapeHtml(task.programmer)}</span>` : ''}
+                    </div>
+                </div>
+                <div class="task-right">
+                    <span class="task-category">${escapeHtml(task.category)}</span>
+                    <span class="stage-badge ${stage.badgeClass}">${stage.label}</span>
+                </div>
+            </div>
+        `;
+    }).join("");
+}
+
+// ===== PREVIEW =====
+function openPreview(taskId) {
+    const task = tasks.find(t => t.id === taskId);
+    if (!task) return;
+
+    const stage = stageConfig[task.stage];
+    const isOverdue = new Date(task.deadline) < new Date() && task.stage !== "backlog";
+
+    document.getElementById("previewTitle").textContent = task.title;
+
+    document.getElementById("previewBody").innerHTML = `
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+            <span class="stage-badge ${stage.badgeClass}">${stage.label}</span>
+            <span class="task-category" style="font-size:13px">${escapeHtml(task.category)}</span>
+        </div>
+
+        <div class="preview-field">
+            <div class="preview-field-label">Ответственный</div>
+            <div class="preview-field-value">${escapeHtml(task.responsible)}</div>
+        </div>
+
+        ${task.programmer ? `
+        <div class="preview-field">
+            <div class="preview-field-label">Программист</div>
+            <div class="preview-field-value">${escapeHtml(task.programmer)}</div>
+        </div>` : ''}
+
+        <div class="preview-field">
+            <div class="preview-field-label">Дедлайн</div>
+            <div class="preview-field-value" style="${isOverdue ? 'color:#ef4444;font-weight:600' : ''}">${formatDate(task.deadline)} ${isOverdue ? '(просрочен)' : ''}</div>
+        </div>
+
+        <div class="preview-field">
+            <div class="preview-field-label">Создана</div>
+            <div class="preview-field-value">${formatDate(task.created)}</div>
+        </div>
+
+        <div class="preview-field">
+            <div class="preview-field-label">Описание</div>
+            <div class="preview-description">${escapeHtml(task.description)}</div>
+        </div>
+    `;
+
+    document.getElementById("previewFooter").innerHTML = `
+        <a class="btn-open-bitrix" href="https://dakar.bitrix24.ru/crm/type/129/details/0/${task.id}/" target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            Открыть в Битрикс24
+        </a>
+    `;
+
+    document.getElementById("previewOverlay").classList.add("active");
+    document.getElementById("previewPanel").classList.add("active");
+}
+
+function closePreview() {
+    document.getElementById("previewOverlay").classList.remove("active");
+    document.getElementById("previewPanel").classList.remove("active");
+}
+
+// ===== FILTERS =====
+function toggleFilter(chip) {
+    const stage = chip.dataset.stage;
+    if (activeFilters.has(stage)) {
+        activeFilters.delete(stage);
+        chip.classList.remove("active");
+    } else {
+        activeFilters.add(stage);
+        chip.classList.add("active");
+    }
+    renderTasks();
+}
+
+// ===== UTILITIES =====
+function formatDate(dateStr) {
+    const d = new Date(dateStr);
+    const months = ["янв", "фев", "мар", "апр", "май", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"];
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+}
+
+function escapeHtml(text) {
+    if (!text) return "";
+    const div = document.createElement("div");
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+function refreshData() {
+    const btn = document.getElementById("refreshBtn");
+    btn.innerHTML = '<span class="spinner"></span> Обновление...';
+    btn.disabled = true;
+
+    const bar = document.getElementById("loadingBar");
+    const fill = document.getElementById("loadingFill");
+    bar.classList.add("active");
+
+    let progress = 0;
+    const interval = setInterval(() => {
+        progress += Math.random() * 15;
+        if (progress > 95) progress = 95;
+        fill.style.width = progress + "%";
+    }, 200);
+
+    setTimeout(() => {
+        clearInterval(interval);
+        fill.style.width = "100%";
+
+        setTimeout(() => {
+            bar.classList.remove("active");
+            fill.style.width = "0%";
+            btn.innerHTML = `
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+                Обновить
+            `;
+            btn.disabled = false;
+
+            const now = new Date();
+            document.getElementById("lastUpdate").textContent =
+                "Обновлено: " + now.getDate() + " " + ["января","февраля","марта","апреля","мая","июня","июля","августа","сентября","октября","ноября","декабря"][now.getMonth()] + " " + now.getFullYear() + ", " +
+                String(now.getHours()).padStart(2,"0") + ":" + String(now.getMinutes()).padStart(2,"0");
+        }, 300);
+    }, 1500);
+}
+
+function exportExcel() {
+    alert("Экспорт в Excel будет реализован в рабочей версии");
+}
+
+// ===== KEYBOARD =====
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closePreview();
+});
+
+// ===== INIT =====
+renderTasks();
+</script>
+</body>
+</html>
