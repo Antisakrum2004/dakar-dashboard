@@ -12,6 +12,12 @@
             background: #f0f2f5;
             color: #1a1a2e;
             min-height: 100vh;
+            transition: filter 0.3s ease;
+        }
+
+        body.blurred > *:not(.preview-overlay):not(.preview-panel):not(.loading-bar) {
+            filter: blur(2px);
+            pointer-events: none;
         }
 
         /* ===== HEADER ===== */
@@ -77,8 +83,7 @@
         .btn-primary:hover { background: #2d2d4a; }
 
         .btn .spinner {
-            width: 12px;
-            height: 12px;
+            width: 12px; height: 12px;
             border: 2px solid rgba(255,255,255,0.3);
             border-top-color: #fff;
             border-radius: 50%;
@@ -92,9 +97,56 @@
 
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        .timestamp {
+        .timestamp { font-size: 11px; color: #98a2b3; }
+
+        /* ===== SUMMARY BAR ===== */
+        .summary {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .summary-title {
             font-size: 11px;
-            color: #98a2b3;
+            font-weight: 600;
+            color: #667085;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+            color: #475469;
+        }
+
+        .summary-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 2px;
+            flex-shrink: 0;
+        }
+
+        .summary-count {
+            font-weight: 700;
+            color: #1a1a2e;
+        }
+
+        .summary-hours {
+            margin-left: auto;
+            font-size: 11px;
+            color: #475469;
+        }
+
+        .summary-hours strong {
+            font-weight: 700;
+            color: #1a1a2e;
         }
 
         /* ===== FILTERS ===== */
@@ -126,25 +178,37 @@
             user-select: none;
         }
 
-        .filter-chip.active {
-            color: #fff;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
-        }
-
-        .filter-chip:not(.active) {
-            background: #f2f4f7;
-            color: #667085;
-        }
-
-        .filter-chip:not(.active):hover {
-            background: #eaecf0;
-        }
+        .filter-chip.active { color: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.15); }
+        .filter-chip:not(.active) { background: #f2f4f7; color: #667085; }
+        .filter-chip:not(.active):hover { background: #eaecf0; }
 
         .fc-backlog.active { background: #3b82f6; }
         .fc-inwork.active { background: #22c55e; }
         .fc-testing.active { background: #ef4444; }
         .fc-release.active { background: #f97316; }
         .fc-payment.active { background: #059669; }
+
+        /* ===== SEARCH ===== */
+        .search-bar {
+            background: #fff;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 8px 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 7px 12px 7px 32px;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #1a1a2e;
+            background: #f9fafb url("data:image/svg+xml,%3Csvg width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2398a2b3' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='11' cy='11' r='8'/%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'/%3E%3C/svg%3E") 10px center no-repeat;
+            outline: none;
+            transition: border-color 0.15s, background-color 0.15s;
+        }
+
+        .search-input::placeholder { color: #b0b8c4; }
+        .search-input:focus { border-color: #3b82f6; background-color: #fff; }
 
         .task-count {
             font-size: 12px;
@@ -154,7 +218,7 @@
 
         /* ===== TASK LIST ===== */
         .container {
-            padding: 12px 16px;
+            padding: 12px 0;
             max-width: 680px;
         }
 
@@ -174,17 +238,23 @@
             transition: all 0.12s;
             gap: 12px;
             min-height: 36px;
+            border-left: 3px solid transparent;
         }
 
         .task-item:hover {
             background: #f8fafc;
             box-shadow: 0 1px 6px rgba(0,0,0,0.06);
-            transform: translateX(2px);
         }
 
         .task-item:active {
-            transform: translateX(0);
             background: #f0f4ff;
+        }
+
+        /* Overdue red glow on hover */
+        .task-item.deadline-overdue:hover {
+            background: #fef2f2;
+            box-shadow: -3px 0 8px rgba(239,68,68,0.25), 0 1px 6px rgba(0,0,0,0.06);
+            border-left-color: #ef4444;
         }
 
         .task-left {
@@ -222,9 +292,13 @@
         }
 
         .task-meta-item svg {
-            width: 11px;
-            height: 11px;
+            width: 11px; height: 11px;
             opacity: 0.5;
+        }
+
+        .task-meta-overdue {
+            color: #ef4444;
+            font-weight: 600;
         }
 
         .task-hours {
@@ -272,51 +346,28 @@
             text-align: center;
         }
 
-        .stage-backlog {
-            background: #dbeafe;
-            color: #1d4ed8;
-        }
-
-        .stage-inwork {
-            background: #dcfce7;
-            color: #15803d;
-        }
-
-        .stage-testing {
-            background: #fee2e2;
-            color: #dc2626;
-        }
-
-        .stage-release {
-            background: #ffedd5;
-            color: #ea580c;
-        }
-
-        .stage-payment {
-            background: #d1fae5;
-            color: #047857;
-        }
-
-        .deadline-overdue .task-title::after {
-            content: ' !';
-            color: #ef4444;
-            font-weight: 700;
-        }
+        .stage-backlog { background: #dbeafe; color: #1d4ed8; }
+        .stage-inwork { background: #dcfce7; color: #15803d; }
+        .stage-testing { background: #fee2e2; color: #dc2626; }
+        .stage-release { background: #ffedd5; color: #ea580c; }
+        .stage-payment { background: #d1fae5; color: #047857; }
 
         /* ===== PREVIEW PANEL ===== */
         .preview-overlay {
             position: fixed;
             inset: 0;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.15);
             z-index: 200;
             opacity: 0;
             visibility: hidden;
-            transition: all 0.2s;
+            transition: all 0.25s;
+            backdrop-filter: blur(0px);
         }
 
         .preview-overlay.active {
             opacity: 1;
             visibility: visible;
+            backdrop-filter: blur(3px);
         }
 
         .preview-panel {
@@ -324,7 +375,7 @@
             top: 0;
             right: 0;
             bottom: 0;
-            width: 520px;
+            width: 480px;
             max-width: 90vw;
             background: #fff;
             z-index: 201;
@@ -335,22 +386,19 @@
             box-shadow: -4px 0 20px rgba(0,0,0,0.12);
         }
 
-        .preview-panel.active {
-            transform: translateX(0);
-        }
+        .preview-panel.active { transform: translateX(0); }
 
         .preview-header {
-            padding: 18px 22px 14px;
+            padding: 16px 20px 12px;
             border-bottom: 1px solid #e5e7eb;
             display: flex;
             align-items: flex-start;
             justify-content: space-between;
-            gap: 16px;
+            gap: 12px;
         }
 
         .preview-close {
-            width: 30px;
-            height: 30px;
+            width: 28px; height: 28px;
             border: none;
             background: #f2f4f7;
             border-radius: 6px;
@@ -360,14 +408,14 @@
             justify-content: center;
             flex-shrink: 0;
             transition: background 0.15s;
-            font-size: 18px;
+            font-size: 16px;
             color: #667085;
         }
 
         .preview-close:hover { background: #eaecf0; }
 
         .preview-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: #1a1a2e;
             line-height: 1.4;
@@ -376,12 +424,10 @@
         .preview-body {
             flex: 1;
             overflow-y: auto;
-            padding: 18px 22px;
+            padding: 16px 20px;
         }
 
-        .preview-field {
-            margin-bottom: 14px;
-        }
+        .preview-field { margin-bottom: 12px; }
 
         .preview-field-label {
             font-size: 10px;
@@ -389,48 +435,48 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: #98a2b3;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
         }
 
         .preview-field-value {
-            font-size: 14px;
+            font-size: 13px;
             color: #344054;
             line-height: 1.5;
         }
 
         .preview-hours-block {
             display: flex;
-            gap: 16px;
-            margin-bottom: 14px;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .preview-hours-card {
             flex: 1;
             background: #f9fafb;
             border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 12px 14px;
+            border-radius: 6px;
+            padding: 8px 10px;
             text-align: center;
         }
 
         .preview-hours-card .label {
-            font-size: 10px;
+            font-size: 9px;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             color: #98a2b3;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .preview-hours-card .value {
-            font-size: 22px;
+            font-size: 18px;
             font-weight: 700;
             color: #1a1a2e;
             line-height: 1.2;
         }
 
         .preview-hours-card .unit {
-            font-size: 12px;
+            font-size: 10px;
             font-weight: 400;
             color: #98a2b3;
         }
@@ -440,25 +486,23 @@
             border-color: #fecaca;
         }
 
-        .preview-hours-card.over-budget .value {
-            color: #dc2626;
-        }
+        .preview-hours-card.over-budget .value { color: #dc2626; }
 
         .preview-description {
             background: #f9fafb;
             border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            padding: 12px 14px;
-            font-size: 13px;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 12px;
             color: #475467;
             line-height: 1.6;
             white-space: pre-wrap;
-            max-height: 300px;
+            max-height: 260px;
             overflow-y: auto;
         }
 
         .preview-footer {
-            padding: 14px 22px;
+            padding: 12px 20px;
             border-top: 1px solid #e5e7eb;
             display: flex;
             gap: 10px;
@@ -466,12 +510,12 @@
 
         .btn-open-bitrix {
             flex: 1;
-            padding: 10px 16px;
+            padding: 9px 14px;
             background: #1a1a2e;
             color: #fff;
             border: none;
-            border-radius: 8px;
-            font-size: 14px;
+            border-radius: 6px;
+            font-size: 13px;
             font-weight: 500;
             cursor: pointer;
             text-decoration: none;
@@ -479,7 +523,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             transition: background 0.15s;
         }
 
@@ -487,25 +531,17 @@
 
         /* ===== LOADING ===== */
         .loading-bar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: #e5e7eb;
-            z-index: 300;
-            overflow: hidden;
-            opacity: 0;
-            transition: opacity 0.2s;
+            position: fixed; top: 0; left: 0; right: 0;
+            height: 3px; background: #e5e7eb;
+            z-index: 300; overflow: hidden;
+            opacity: 0; transition: opacity 0.2s;
         }
 
         .loading-bar.active { opacity: 1; }
 
         .loading-bar-fill {
-            height: 100%;
-            background: #3b82f6;
-            width: 0%;
-            transition: width 0.3s;
+            height: 100%; background: #3b82f6;
+            width: 0%; transition: width 0.3s;
             border-radius: 0 2px 2px 0;
         }
 
@@ -513,27 +549,24 @@
         @media (max-width: 640px) {
             .header { padding: 10px 14px; }
             .header-title { font-size: 16px; }
+            .summary { padding: 8px 14px; gap: 10px; }
             .filters { padding: 8px 14px; }
+            .search-bar { padding: 6px 14px; }
             .task-item { padding: 7px 12px; gap: 8px; }
             .task-title { font-size: 12px; }
             .stage-badge { min-width: 75px; font-size: 9px; padding: 3px 7px; }
             .task-category { display: none; }
             .task-hours { font-size: 10px; }
-            .container { padding: 8px 10px; }
+            .container { max-width: 100%; }
             .task-meta { gap: 6px; }
             .preview-panel { width: 100%; max-width: 100vw; }
         }
 
         /* Scrollbar */
         .task-list::-webkit-scrollbar,
-        .preview-body::-webkit-scrollbar {
-            width: 6px;
-        }
+        .preview-body::-webkit-scrollbar { width: 6px; }
         .task-list::-webkit-scrollbar-thumb,
-        .preview-body::-webkit-scrollbar-thumb {
-            background: #d1d5db;
-            border-radius: 3px;
-        }
+        .preview-body::-webkit-scrollbar-thumb { background: #d1d5db; border-radius: 3px; }
     </style>
 </head>
 <body>
@@ -552,7 +585,6 @@
         </div>
     </div>
     <div class="header-actions">
-        <div class="timestamp" id="taskCount">47 задач</div>
         <button class="btn" onclick="refreshData()" id="refreshBtn">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
             Обновить
@@ -562,6 +594,17 @@
             Excel
         </button>
     </div>
+</div>
+
+<!-- Summary -->
+<div class="summary" id="summaryBar">
+    <span class="summary-title">Сводка</span>
+    <span class="summary-item"><span class="summary-dot" style="background:#3b82f6"></span> Бэклог: <span class="summary-count" id="sumBacklog">0</span></span>
+    <span class="summary-item"><span class="summary-dot" style="background:#22c55e"></span> В работе: <span class="summary-count" id="sumInwork">0</span></span>
+    <span class="summary-item"><span class="summary-dot" style="background:#ef4444"></span> Тест: <span class="summary-count" id="sumTesting">0</span></span>
+    <span class="summary-item"><span class="summary-dot" style="background:#f97316"></span> Релиз: <span class="summary-count" id="sumRelease">0</span></span>
+    <span class="summary-item"><span class="summary-dot" style="background:#059669"></span> Оплата: <span class="summary-count" id="sumPayment">0</span></span>
+    <span class="summary-hours">Σ факт: <strong id="sumHours">0</strong> ч</span>
 </div>
 
 <!-- Filters -->
@@ -575,10 +618,14 @@
     <span class="task-count" id="filteredCount">47 задач</span>
 </div>
 
+<!-- Search -->
+<div class="search-bar">
+    <input class="search-input" type="text" id="searchInput" placeholder="Поиск по названию задачи..." oninput="renderTasks()">
+</div>
+
 <!-- Task List -->
 <div class="container">
-    <div class="task-list" id="taskList">
-    </div>
+    <div class="task-list" id="taskList"></div>
 </div>
 
 <!-- Preview Overlay -->
@@ -667,10 +714,29 @@ const stageConfig = {
 // ===== STATE =====
 let activeFilters = new Set(["backlog", "inwork", "testing", "release", "payment"]);
 
+// ===== SUMMARY =====
+function updateSummary() {
+    const counts = { backlog: 0, inwork: 0, testing: 0, release: 0, payment: 0 };
+    let totalHours = 0;
+    tasks.forEach(t => {
+        if (counts.hasOwnProperty(t.stage)) counts[t.stage]++;
+        totalHours += t.hoursActual;
+    });
+    document.getElementById("sumBacklog").textContent = counts.backlog;
+    document.getElementById("sumInwork").textContent = counts.inwork;
+    document.getElementById("sumTesting").textContent = counts.testing;
+    document.getElementById("sumRelease").textContent = counts.release;
+    document.getElementById("sumPayment").textContent = counts.payment;
+    document.getElementById("sumHours").textContent = totalHours;
+}
+
 // ===== RENDER =====
 function renderTasks() {
     const list = document.getElementById("taskList");
-    const filtered = tasks.filter(t => activeFilters.has(t.stage));
+    const query = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+
+    let filtered = tasks.filter(t => activeFilters.has(t.stage));
+    if (query) filtered = filtered.filter(t => t.title.toLowerCase().includes(query));
 
     filtered.sort((a, b) => new Date(b.created) - new Date(a.created));
 
@@ -685,6 +751,10 @@ function renderTasks() {
             ? `<span class="task-meta-item"><span class="task-hours"><span class="hours-actual">${task.hoursActual}</span> ч</span></span>`
             : '';
 
+        const overdueTag = isOverdue
+            ? `<span class="task-meta-item task-meta-overdue">⚠ просрочен</span>`
+            : '';
+
         return `
             <div class="task-item ${isOverdue ? 'deadline-overdue' : ''}" onclick="openPreview(${task.id})">
                 <div class="task-left">
@@ -697,6 +767,7 @@ function renderTasks() {
                         <span class="task-meta-item">${escapeHtml(task.responsible)}</span>
                         ${task.programmer ? `<span class="task-meta-item" style="color:#667085">→ ${escapeHtml(task.programmer)}</span>` : ''}
                         ${hoursHtml}
+                        ${overdueTag}
                     </div>
                 </div>
                 <div class="task-right">
@@ -733,7 +804,7 @@ function openPreview(taskId) {
     ` : '';
 
     document.getElementById("previewBody").innerHTML = `
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
             <span class="stage-badge ${stage.badgeClass}">${stage.label}</span>
             <span class="task-category" style="font-size:12px">${escapeHtml(task.category)}</span>
         </div>
@@ -776,11 +847,13 @@ function openPreview(taskId) {
 
     document.getElementById("previewOverlay").classList.add("active");
     document.getElementById("previewPanel").classList.add("active");
+    document.body.classList.add("blurred");
 }
 
 function closePreview() {
     document.getElementById("previewOverlay").classList.remove("active");
     document.getElementById("previewPanel").classList.remove("active");
+    document.body.classList.remove("blurred");
 }
 
 // ===== FILTERS =====
@@ -815,7 +888,7 @@ function exportExcel() {
     const filtered = tasks.filter(t => activeFilters.has(t.stage));
     const stageLabels = { backlog:"Бэклог", inwork:"В работе", testing:"Тестирование", release:"В релиз", payment:"На оплату" };
 
-    let csv = '\uFEFF'; // BOM for UTF-8
+    let csv = '\uFEFF';
     csv += "ID;Название;Стадия;Категория;Ответственный;Программист;Дедлайн;Создана;Факт трудозатраты (ч)\n";
     filtered.forEach(t => {
         csv += `${t.id};${t.title};${stageLabels[t.stage]};${t.category};${t.responsible};${t.programmer || ""};${formatDate(t.deadline)};${formatDate(t.created)};${t.hoursActual}\n`;
@@ -862,13 +935,11 @@ function refreshData() {
 
 // ===== INIT =====
 document.addEventListener("DOMContentLoaded", () => {
+    updateSummary();
     renderTasks();
 });
 
-// ESC to close preview
-document.addEventListener("keydown", e => {
-    if (e.key === "Escape") closePreview();
-});
+document.addEventListener("keydown", e => { if (e.key === "Escape") closePreview(); });
 </script>
 </body>
 </html>
